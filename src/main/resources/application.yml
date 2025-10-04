@@ -1,0 +1,24 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/postgres
+    username: postgres
+    password: postgres
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 30000
+  sql:
+    init:
+      mode: always              # Executa toda inicializa��o SQL no startup
+      platform: postgres        # Procura schema-postgres.sql e data-postgres.sql
+      separator: "@@"             # <- Separa os statements de TOPO
+      continue-on-erro: true    # ignora erros não-críticos em reruns
+
+  jackson:
+    time-zone: America/Sao_Paulo
+    serialization:
+      write-dates-as-timestamps: false
+
+logging.level:
+  root: INFO
+  br.com.solbank: DEBUG
