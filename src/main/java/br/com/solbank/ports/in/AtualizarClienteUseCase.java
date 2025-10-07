@@ -3,7 +3,6 @@ package br.com.solbank.ports.in;
 import java.util.UUID;
 
 public interface AtualizarClienteUseCase {
-    //TODO entender com o chatGPT o que é o comando
     void executar (Comando comando);
 
     record Comando(

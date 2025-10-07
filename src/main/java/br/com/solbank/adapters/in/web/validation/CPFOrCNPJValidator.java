@@ -4,7 +4,6 @@ import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import java.util.regex.Pattern;
 
-//TODO Verificar o que eh essa classe ConstraintValidator
 public class CPFOrCNPJValidator implements ConstraintValidator<CPFOrCNPJ, String>{
     private static final Pattern CPF = Pattern.compile("^\\d{11}$");
     private static final Pattern CNPJ = Pattern.compile("^\\d{14}$");

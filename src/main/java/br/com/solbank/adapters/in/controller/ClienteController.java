@@ -1,6 +1,8 @@
 package br.com.solbank.adapters.in.controller;
 
 import br.com.solbank.adapters.in.controller.dto.atualizarcliente.ClienteUpdateRequest;
+import br.com.solbank.adapters.in.controller.dto.buscarcliente.ClienteBatchRequest;
+import br.com.solbank.adapters.in.controller.dto.buscarcliente.ClienteBatchResponse;
 import br.com.solbank.adapters.in.controller.dto.buscarcliente.ClienteSearchResponse;
 import br.com.solbank.adapters.in.controller.dto.cadastrarcliente.ClienteRequest;
 import br.com.solbank.adapters.in.controller.dto.cadastrarcliente.ClienteResponse;
@@ -8,10 +10,7 @@ import br.com.solbank.common.logging.LogExec;
 import br.com.solbank.domain.exception.NotFoundException;
 import br.com.solbank.domain.model.Cliente;
 import br.com.solbank.domain.model.ClienteFiltro;
-import br.com.solbank.ports.in.AtualizarClienteUseCase;
-import br.com.solbank.ports.in.BuscarClientesUseCase;
-import br.com.solbank.ports.in.CadastrarClienteUseCase;
-import br.com.solbank.ports.in.ExcluirClienteUseCase;
+import br.com.solbank.ports.in.*;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -30,17 +29,20 @@ public class ClienteController {
     private final BuscarClientesUseCase buscarClientesUseCase;
     private final AtualizarClienteUseCase atualizarClienteUseCase;
     private final ExcluirClienteUseCase excluirClienteUseCase;
+    private final BuscarClientesBatchUseCase buscarClientesBatchUseCase;
 
     public ClienteController(
             CadastrarClienteUseCase cadastrarClienteUseCase,
             BuscarClientesUseCase buscarClientesUseCase,
             AtualizarClienteUseCase atualizarClienteUseCase,
-            ExcluirClienteUseCase excluirClienteUseCase
+            ExcluirClienteUseCase excluirClienteUseCase,
+            BuscarClientesBatchUseCase buscarClientesBatchUseCase
     ){
         this.cadastrarClienteUseCase = cadastrarClienteUseCase;
         this.buscarClientesUseCase = buscarClientesUseCase;
         this.atualizarClienteUseCase = atualizarClienteUseCase;
         this.excluirClienteUseCase = excluirClienteUseCase;
+        this.buscarClientesBatchUseCase = buscarClientesBatchUseCase;
     }
 
     @PostMapping
@@ -119,6 +121,18 @@ public class ClienteController {
 
     private String somenteDigitos(String s) {
         return s == null ? null : s.replaceAll("\\D", "");
+    }
+
+    @PostMapping("/concurrence-find")
+    @LogExec("api-post-clientes-batch")
+    public ResponseEntity<ClienteBatchResponse> buscarBatch(@Valid @RequestBody ClienteBatchRequest body) {
+        List<UUID> ids = body.ids();
+        BuscarClientesBatchUseCase.Mode mode = body.mode() == null ? BuscarClientesBatchUseCase.Mode.SEQ : body.mode();
+        var resultado = buscarClientesBatchUseCase.executar(ids, mode);
+        var payload = resultado.clientes().stream()
+                .map(c -> new ClienteSearchResponse(c.id(), c.nome(), c.cpfCnpj(), c.email(), c.telefone()))
+                .toList();
+        return ResponseEntity.ok(new ClienteBatchResponse(mode.name(), resultado.elapsedMs(), payload));
     }
 
 }

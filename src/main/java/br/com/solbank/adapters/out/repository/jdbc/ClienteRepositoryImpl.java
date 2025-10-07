@@ -1,4 +1,4 @@
-package br.com.solbank.adapters.out.jdbc;
+package br.com.solbank.adapters.out.repository.jdbc;
 
 import br.com.solbank.domain.model.Cliente;
 import br.com.solbank.ports.out.ClienteRepository;
@@ -71,7 +71,6 @@ public class ClienteRepositoryImpl implements ClienteRepository {
                                     String emailLike,
                                     String telefoneDigits,
                                     int limit, int offset){
-        //TODO o que é esse WHERE 1-1?
         StringBuilder sql = new StringBuilder("""
                 SELECT id, nome, cpf_cnpj, email, telefone, criado_em, atualizado_em
                 FROM clientes
@@ -146,4 +145,38 @@ public class ClienteRepositoryImpl implements ClienteRepository {
     public int deletarPorId(UUID id){
         return jdbc.update("DELETE FROM clientes WHERE id = ", id);
     }
+
+    public List<Cliente> buscarPorIds(List<UUID> ids) {
+        if (ids == null || ids.isEmpty()) return List.of();
+        var params = new MapSqlParameterSource()
+                .addValue("ids", ids);
+        String sql = """
+                SELECT id, nome, cpf_cnpj, email, telefone, criado_em, atualizado_em
+                FROM clientes
+                WHERE id IN (:ids)
+                ORDER BY criado_em DESC
+                """;
+        return named.query(sql, params, MAPPER);
+    }
+
+    @Override
+    public List<Cliente> buscarPorIdsArray(List<UUID> ids) {
+        if (ids == null || ids.isEmpty()) return List.of();
+
+        final String sql = """
+        SELECT id, nome, cpf_cnpj, email, telefone, criado_em, atualizado_em
+        FROM clientes
+        WHERE id = ANY(?::uuid[])
+        ORDER BY criado_em DESC
+    """;
+
+        return jdbc.query(con -> {
+            var ps  = con.prepareStatement(sql);
+            var arr = con.createArrayOf("uuid", ids.toArray());
+            ps.setArray(1, arr);
+            return ps;
+        }, MAPPER); // MAPPER: RowMapper<Cliente>
+    }
+
+
 }

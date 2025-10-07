@@ -73,3 +73,9 @@ CREATE INDEX IF NOT EXISTS idx_clientes_cpf ON clientes(cpf_cnpj);
 CREATE INDEX IF NOT EXISTS idx_clientes_email ON clientes(email);
 CREATE INDEX IF NOT EXISTS idx_clientes_tel ON clientes(telefone);
 CREATE INDEX IF NOT EXISTS idx_clientes_nome_lower ON clientes((lower(nome)));
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+@@
+CREATE INDEX IF NOT EXISTS idx_clientes_nome_trgm  ON clientes USING gin (nome gin_trgm_ops);
+@@
+CREATE INDEX IF NOT EXISTS idx_clientes_email_trgm ON clientes USING gin (email gin_trgm_ops);
+@@

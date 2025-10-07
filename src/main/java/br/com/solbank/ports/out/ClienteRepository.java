@@ -24,4 +24,8 @@ public interface ClienteRepository {
     int atualizarParcial(UUID id, String nome, String cpfCnpjDigits, String email, String telefone);
 
     int deletarPorId(UUID id);
+
+    List<Cliente> buscarPorIds(List<UUID> ids);
+
+    List<Cliente> buscarPorIdsArray(List<UUID> ids);
 }

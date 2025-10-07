@@ -5,7 +5,6 @@ import jakarta.validation.Payload;
 import java.lang.annotation.*;
 
 
-//TODO Pedir para o GPT explicar essa classe
 @Documented
 @Constraint(validatedBy = CPFOrCNPJValidator.class)
 @Target({ElementType.FIELD, ElementType.PARAMETER})
